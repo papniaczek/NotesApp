@@ -10,6 +10,8 @@ namespace NotesApp.Services;
 public class AppManager
 {
     private static AppManager _instance;
+    
+    private List<IObserver> _observers = new List<IObserver>();
 
     private AppManager()
     {
@@ -36,12 +38,25 @@ public class AppManager
     
     public ObservableCollection<IEntryComponent> AllEntries { get; private set; } = new ObservableCollection<IEntryComponent>();
     
+    public void Attach(IObserver observer)
+    {
+        _observers.Add(observer);
+    }
+
+    public void NotifyObservers()
+    {
+        foreach (var observer in _observers)
+        {
+            observer.Update();
+        }
+    }
+    
     public void AddEntry(IEntryComponent entry)
     {
         AllEntries.Add(entry);
         Console.WriteLine($"[AppManager] Dodano: {entry.DisplayName}");
         
-        // NotifyObservers();
+        NotifyObservers();
     }
     
     public void RemoveEntry(IEntryComponent entry)
