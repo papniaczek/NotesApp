@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized; // Potrzebne do wykrywania zmian w liście
 using System.Linq;
@@ -16,13 +17,42 @@ public partial class MainWindowViewModel : ViewModelBase
     // --- 1. ZARZĄDZANIE WIDOKIEM (TABS) ---
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsTaskView))]
-    private string _currentTab = "Task"; 
+    [NotifyPropertyChangedFor(nameof(IsNoteView))]
+    private string _currentTab = "Task";
 
     public bool IsTaskView => CurrentTab == "Task";
+    public bool IsNoteView => CurrentTab == "Note";
 
     // --- 2. LISTA DANYCH ---
 
     public ObservableCollection<IEntryComponent> FilteredEntries { get; } = new();
+    
+    // --- FILTROWANIE ---
+
+    [ObservableProperty]
+    private string _filterTagsText = string.Empty;
+
+    [ObservableProperty]
+    private string _selectedFilterPriority = "Wszystkie";
+
+    public List<string> FilterPriorities { get; } = new() { "Wszystkie", "High", "Normal", "Low" };
+
+    partial void OnFilterTagsTextChanged(string value) => RefreshList();
+    partial void OnSelectedFilterPriorityChanged(string value) => RefreshList();
+    
+    public ObservableCollection<string> ExistingTags { get; } = new();
+    
+    [ObservableProperty]
+    private string? _selectedTagFromList;
+    
+    partial void OnSelectedTagFromListChanged(string? value)
+    {
+        if (!string.IsNullOrEmpty(value))
+        {
+            FilterTagsText = value;
+            SelectedTagFromList = null;
+        }
+    }
 
     // --- 3. FORMULARZ ---
 
@@ -31,6 +61,9 @@ public partial class MainWindowViewModel : ViewModelBase
     
     [ObservableProperty] 
     private string _newTaskPriority = "Normal";
+    
+    [ObservableProperty]
+    private string _newEntryTags = string.Empty;
 
     public List<string> AvailablePriorities { get; } = new() { "High", "Normal", "Low" };
 
@@ -54,6 +87,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         AppManager.Instance.AllEntries.CollectionChanged += OnMainListChanged;
 
+        UpdateExistingTags();
         RefreshList();
     }
 
@@ -61,6 +95,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private void SwitchTab(string tabName)
     {
         CurrentTab = tabName;
+        FilterTagsText = string.Empty; 
+        SelectedFilterPriority = "Wszystkie";
+        
         RefreshList();
     }
 
@@ -68,18 +105,32 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         FilteredEntries.Clear();
 
-        IEnumerable<IEntryComponent> itemsToAdd;
+        IEnumerable<IEntryComponent> query;
 
         if (CurrentTab == "Task")
         {
-            itemsToAdd = AppManager.Instance.AllEntries.OfType<Task>();
+            query = AppManager.Instance.AllEntries.OfType<Task>();
         }
         else
         {
-            itemsToAdd = AppManager.Instance.AllEntries.OfType<Note>();
+            query = AppManager.Instance.AllEntries.OfType<Note>();
         }
 
-        foreach (var item in itemsToAdd)
+        if (!string.IsNullOrWhiteSpace(FilterTagsText))
+        {
+            var searchTerms = FilterTagsText.ToLower().Split(new[] { ' ', ',' }, System.StringSplitOptions.RemoveEmptyEntries);
+
+            query = query.Where(item => 
+                item.Tags.Any(tag => searchTerms.Any(term => tag.ToLower().Contains(term)))
+            );
+        }
+
+        if (CurrentTab == "Task" && SelectedFilterPriority != "Wszystkie")
+        {
+            query = query.OfType<Task>().Where(t => t.Priority == SelectedFilterPriority);
+        }
+
+        foreach (var item in query)
         {
             FilteredEntries.Add(item);
         }
@@ -87,6 +138,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void OnMainListChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
+        UpdateExistingTags();
         RefreshList();
     }
 
@@ -95,21 +147,29 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(NewTaskDescription)) return;
 
+        var tagsList = NewEntryTags
+            .Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries)
+            .ToList();
+
         IEntryComponent newEntry;
 
         if (CurrentTab == "Task")
         {
-            newEntry = new TaskBuilder()
+            var builder = new TaskBuilder()
                 .SetDescription(NewTaskDescription)
                 .SetPriority(NewTaskPriority)
-                .SetCategory("Ogólne")
-                .Build();
+                .SetCategory("Ogólne");
+            
+            var task = builder.Build();
+            task.Tags = tagsList;
+            newEntry = task;
         }
         else
         {
             newEntry = new Note
             {
-                Description = NewTaskDescription
+                Description = NewTaskDescription,
+                Tags = tagsList
             };
         }
 
@@ -117,5 +177,23 @@ public partial class MainWindowViewModel : ViewModelBase
         command.Execute(null);
 
         NewTaskDescription = string.Empty;
+        NewEntryTags = string.Empty;
+    }
+    
+    private void UpdateExistingTags()
+    {
+        var allItems = AppManager.Instance.AllEntries;
+
+        var distinctTags = allItems
+            .SelectMany(x => x.Tags)
+            .Distinct()
+            .OrderBy(t => t)
+            .ToList();
+
+        ExistingTags.Clear();
+        foreach (var tag in distinctTags)
+        {
+            ExistingTags.Add(tag);
+        }
     }
 }
