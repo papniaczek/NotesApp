@@ -64,11 +64,8 @@
                          SelectedItem="{Binding SelectedEntry}"
                          Background="Transparent">
                     
-                    <!-- TUTAJ JEST NAPRAWA BŁĘDU ISSELECTABLE -->
                     <ListBox.Styles>
                         <Style Selector="ListBoxItem">
-                            <!-- KLUCZOWE: Dodano DataType=models:IEntryComponent -->
-                            <!-- Teraz XAML wie, że ma szukać IsSelectable w elemencie listy, a nie w oknie -->
                             <Setter Property="IsHitTestVisible" Value="{Binding IsSelectable, DataType=models:IEntryComponent}"/>
                             <Setter Property="Focusable" Value="{Binding IsSelectable, DataType=models:IEntryComponent}"/>
                         </Style>
@@ -76,18 +73,18 @@
 
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <!-- Usunęliśmy zewnętrzny Grid, który wymuszał przycisk X dla wszystkich -->
                             <ContentControl Content="{Binding}">
                                 <ContentControl.DataTemplates>
                                     
-                                    <!-- Nagłówek Daty (BEZ PRZYCISKU USUWANIA) -->
+                                    <!-- Nagłówek Daty -->
                                     <DataTemplate DataType="vm:DateHeader">
-                                        <Border Background="#F0F4C3" CornerRadius="4" Padding="5,2" Margin="0,10,0,2" HorizontalAlignment="Left">
+                                        <Border Background="#F0F4C3" CornerRadius="4" Padding="5,2" Margin="0,10,0,2" HorizontalAlignment="Left"
+                                                IsHitTestVisible="False" Focusable="False">
                                             <TextBlock Text="{Binding Title}" FontWeight="Bold" Foreground="#827717" FontSize="11"/>
                                         </Border>
                                     </DataTemplate>
 
-                                    <!-- Task na liście (Z PRZYCISKIEM USUWANIA) -->
+                                    <!-- Task na liście -->
                                     <DataTemplate DataType="models:Task">
                                         <Grid ColumnDefinitions="*, Auto">
                                             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
@@ -97,23 +94,19 @@
                                                            FontWeight="SemiBold"
                                                            TextTrimming="CharacterEllipsis"/>
                                             </StackPanel>
-                                            
-                                            <!-- Przycisk jest teraz tutaj, tylko dla Tasków -->
                                             <Button Grid.Column="1" Content="x" Foreground="Red" Background="Transparent" Padding="5"
                                                     Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).RemoveEntryCommand}"
                                                     CommandParameter="{Binding .}"/>
                                         </Grid>
                                     </DataTemplate>
 
-                                    <!-- Notatka na liście (Z PRZYCISKIEM USUWANIA) -->
+                                    <!-- Notatka na liście -->
                                     <DataTemplate DataType="models:Note">
                                         <Grid ColumnDefinitions="*, Auto">
                                             <StackPanel Grid.Column="0" Orientation="Vertical">
                                                 <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="14"/>
                                                 <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" MaxLines="1" TextTrimming="CharacterEllipsis"/>
                                             </StackPanel>
-                                            
-                                            <!-- Przycisk jest teraz tutaj, tylko dla Notatek -->
                                             <Button Grid.Column="1" Content="x" Foreground="Red" Background="Transparent" Padding="5"
                                                     Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).RemoveEntryCommand}"
                                                     CommandParameter="{Binding .}"/>
@@ -127,21 +120,18 @@
                 </ListBox>
             </DockPanel>
 
-            <!-- 4. DODAWANIE (Uproszczone na dole) -->
+            <!-- 4. DODAWANIE -->
             <Border Grid.Row="3" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="15">
                 <StackPanel Spacing="5">
                     <TextBlock Text="Nowy element:" FontWeight="Bold"/>
                     
-                    <!-- Pole Tytułu (Tylko dla notatek) -->
                     <TextBox Text="{Binding NewNoteTitle}" Watermark="Tytuł notatki..." IsVisible="{Binding IsNoteView}"/>
                     
-                    <!-- TU BYŁ BŁĄD: Zamiast wiązać Watermark do IsNoteView, wiążemy do EntryDescriptionWatermark -->
                     <TextBox Text="{Binding NewTaskDescription}" 
                              Watermark="{Binding EntryDescriptionWatermark}"/>
                     
                     <TextBox Text="{Binding NewEntryTags}" Watermark="Tagi (np. praca, dom)"/>
 
-                    <!-- Wybór Priorytetu i Daty (Widoczny tylko dla Zadań) -->
                     <StackPanel Orientation="Horizontal" Spacing="5" IsVisible="{Binding IsTaskView}">
                         <ComboBox ItemsSource="{Binding AvailablePriorities}" 
                                   SelectedItem="{Binding NewTaskPriority}"
@@ -163,15 +153,14 @@
 
         <!-- === PRAWY PANEL (Content / Edytor) === -->
         <Border Grid.Column="1" Padding="40" Background="#F9F9F9">
-            <!-- Wyświetla szczegóły ZAZNACZONEGO elementu -->
             <Panel>
-                <!-- PUSTY STAN (Widoczny gdy SelectedEntry == null) -->
+                <!-- PUSTY STAN -->
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
                             IsVisible="{Binding SelectedEntry, Converter={x:Static ObjectConverters.IsNull}}">
                     <TextBlock Text="Wybierz notatkę lub zadanie z listy" FontSize="20" Foreground="Gray"/>
                 </StackPanel>
 
-                <!-- ZAWARTOŚĆ (Widoczna gdy SelectedEntry != null) -->
+                <!-- ZAWARTOŚĆ -->
                 <ContentControl Content="{Binding SelectedEntry}" IsVisible="{Binding SelectedEntry, Converter={x:Static ObjectConverters.IsNotNull}}">
                     <ContentControl.DataTemplates>
                         
@@ -196,7 +185,6 @@
                                         <TextBlock Text="{Binding Priority, StringFormat='Priorytet: {0}'}" Foreground="#1565C0"/>
                                     </Border>
                                     
-                                    <!-- Wyświetlanie Terminu -->
                                     <Border Background="#FFEBEE" CornerRadius="5" Padding="5">
                                         <StackPanel Orientation="Horizontal" Spacing="5">
                                             <TextBlock Text="📅"/>
@@ -220,9 +208,11 @@
                             </StackPanel>
                         </DataTemplate>
 
-                        <!-- WIDOK SZCZEGÓŁOWY NOTATKI (Obsidian Style) -->
+                        <!-- WIDOK SZCZEGÓŁOWY NOTATKI -->
                         <DataTemplate DataType="models:Note">
-                            <Grid RowDefinitions="Auto, *">
+                            <Grid RowDefinitions="Auto, *, Auto"> <!-- 3 Wiersze -->
+                                
+                                <!-- 1. Tytuł -->
                                 <TextBox Grid.Row="0" 
                                          Text="{Binding Title}" 
                                          FontSize="32" 
@@ -232,6 +222,7 @@
                                          Watermark="Bez tytułu"
                                          Margin="0,0,0,20"/>
                                 
+                                <!-- 2. Treść -->
                                 <TextBox Grid.Row="1" 
                                          Text="{Binding Description}" 
                                          AcceptsReturn="True" 
@@ -241,6 +232,23 @@
                                          FontSize="16"
                                          VerticalAlignment="Stretch"
                                          VerticalContentAlignment="Top"/>
+
+                                <!-- 3. TAGI (NOWE) -->
+                                <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10" Margin="0,20,0,0">
+                                    <ItemsControl ItemsSource="{Binding Tags}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#FFF9C4" CornerRadius="4" Padding="8,2" Margin="0,0,5,0">
+                                                    <TextBlock Text="{Binding StringFormat='#{0}'}" Foreground="#FBC02D" FontWeight="SemiBold"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </StackPanel>
+
                             </Grid>
                         </DataTemplate>
 

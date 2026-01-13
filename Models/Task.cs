@@ -22,7 +22,6 @@ public partial class Task : ObservableObject, IEntryComponent
     public string DisplayName => $"[ZADANIE] {Description} ({Priority})";
     public string Title => Description;
 
-    // NOWE: Zadania są klikalne
     public bool IsSelectable => true;
 
     partial void OnDescriptionChanged(string value)

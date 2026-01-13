@@ -19,7 +19,7 @@ public class NoteStatsObserver : IObserver
 
         int total = notes.Count;
 
-        string report = $"📌 Notatki: {total}";
+        string report = $"Notatki: {total}";
 
         _updateAction(report);
     }

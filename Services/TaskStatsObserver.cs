@@ -21,7 +21,7 @@ public class TaskStatsObserver : IObserver
         int done = tasks.Count(t => t.IsDone);
         int pending = total - done;
 
-        string report = $"📋 Zadania: {pending} do zrobienia (z {total})";
+        string report = $"Zadania: {pending} do zrobienia (z {total})";
         
         _updateAction(report);
     }

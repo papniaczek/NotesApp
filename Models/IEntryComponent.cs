@@ -8,7 +8,6 @@ public interface IEntryComponent
     bool IsDone { get; set; }
     List<string> Tags { get; set; }
     
-    // NOWE POLE: Czy element można zaznaczyć/kliknąć?
     bool IsSelectable { get; }
     
     void Display();

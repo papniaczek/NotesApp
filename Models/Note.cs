@@ -18,7 +18,6 @@ public partial class Note : ObservableObject, IEntryComponent
 
     public string DisplayName => Title;
 
-    // NOWE: Notatki są klikalne
     public bool IsSelectable => true;
 
     public void Display() { }

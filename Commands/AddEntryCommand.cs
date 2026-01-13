@@ -21,6 +21,4 @@ public class AddEntryCommand : ICommand
     {
         AppManager.Instance.AddEntry(_entryToAdd);
     }
-    
-    // Opcjonalnie: Tutaj mogłaby być metoda Undo(), która robi RemoveEntry(_entryToAdd)
 }
