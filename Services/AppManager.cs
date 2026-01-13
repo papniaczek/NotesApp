@@ -23,7 +23,7 @@ public class AppManager
 
         if (AllEntries.Count == 0)
         {
-            var welcomeNote = new Note { Description = "Witaj w NotesApp! To Twoja pierwsza notatka." };
+            var welcomeNote = new Note { Description = "Eluwina wariacie" };
             AddEntry(welcomeNote);
         }
     }

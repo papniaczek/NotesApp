@@ -13,8 +13,8 @@
         x:Class="NotesApp.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         x:Name="Root"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="NotesApp Desktop"
+        Icon="/Assets/mammon.ico"
+        Title="Notatnik"
         
         RequestedThemeVariant="Light">
 
@@ -23,7 +23,6 @@
     </Design.DataContext>
     
     <Window.Styles>
-        <!-- Styl dla listy po lewej -->
         <Style Selector="ListBoxItem">
             <Setter Property="Padding" Value="10"/>
             <Setter Property="CornerRadius" Value="5"/>
@@ -31,18 +30,17 @@
         </Style>
     </Window.Styles>
 
-    <!-- GŁÓWNY GRID: 2 Kolumny -->
     <Grid ColumnDefinitions="300, *" Background="#F0F2F5">
         
-        <!-- === LEWY PANEL (Sidebar) === -->
+        <!-- lewy panel -->
         <Grid Grid.Column="0" RowDefinitions="Auto, Auto, *, Auto" Background="White">
             
-            <!-- 1. NAGŁÓWEK -->
+            <!-- naglowek -->
             <Border Grid.Row="0" Padding="20" Background="#2C3E50">
-                <TextBlock Text="NotesApp" Foreground="White" FontWeight="Bold" FontSize="18"/>
+                <TextBlock Text="Notatnik" Foreground="White" FontWeight="Bold" FontSize="18"/>
             </Border>
 
-            <!-- 2. PRZEŁĄCZNIK (Zadania / Notatki) -->
+            <!-- notatki <- -> zadania -->
             <Grid Grid.Row="1" ColumnDefinitions="*, *" Margin="10">
                 <Button Grid.Column="0" Content="Zadania" 
                         Command="{Binding SwitchTabCommand}" CommandParameter="Task"
@@ -54,9 +52,9 @@
                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
             </Grid>
 
-            <!-- 3. LISTA ELEMENTÓW (Tytuły) -->
+            <!-- lista elementow -->
             <DockPanel Grid.Row="2" Margin="10,0">
-                <!-- Szukajka -->
+                <!-- szukanie -->
                 <TextBox DockPanel.Dock="Top" Text="{Binding FilterTagsText}" Watermark="Szukaj..." Margin="0,0,0,10"/>
                 
                 <!-- Lista -->
@@ -88,7 +86,9 @@
                                     <DataTemplate DataType="models:Task">
                                         <Grid ColumnDefinitions="*, Auto">
                                             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
-                                                <CheckBox IsChecked="{Binding IsDone}" IsHitTestVisible="True"/> 
+                                                <CheckBox IsChecked="{Binding IsDone}" IsHitTestVisible="True"
+                                                          Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).MarkAsDoneCommand}"
+                                                          CommandParameter="{Binding .}"/>
                                                 <TextBlock Text="{Binding Description}" 
                                                            VerticalAlignment="Center" 
                                                            FontWeight="SemiBold"
@@ -100,7 +100,6 @@
                                         </Grid>
                                     </DataTemplate>
 
-                                    <!-- Notatka na liście -->
                                     <DataTemplate DataType="models:Note">
                                         <Grid ColumnDefinitions="*, Auto">
                                             <StackPanel Grid.Column="0" Orientation="Vertical">
@@ -120,7 +119,7 @@
                 </ListBox>
             </DockPanel>
 
-            <!-- 4. DODAWANIE -->
+            <!-- dodawanie -->
             <Border Grid.Row="3" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="15">
                 <StackPanel Spacing="5">
                     <TextBlock Text="Nowy element:" FontWeight="Bold"/>
@@ -151,111 +150,134 @@
         </Grid>
 
 
-        <!-- === PRAWY PANEL (Content / Edytor) === -->
-        <Border Grid.Column="1" Padding="40" Background="#F9F9F9">
-            <Panel>
-                <!-- PUSTY STAN -->
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
-                            IsVisible="{Binding SelectedEntry, Converter={x:Static ObjectConverters.IsNull}}">
-                    <TextBlock Text="Wybierz notatkę lub zadanie z listy" FontSize="20" Foreground="Gray"/>
-                </StackPanel>
+        <!-- prawy panel -->
+        <Border Grid.Column="1" Background="#F9F9F9">
+            <Grid RowDefinitions="*, Auto">
+                <Panel Grid.Row="0" Margin="20">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                                IsVisible="{Binding SelectedEntry, Converter={x:Static ObjectConverters.IsNull}}">
+                        <TextBlock Text="Wybierz notatkę lub zadanie z listy" FontSize="20" Foreground="Gray"/>
+                    </StackPanel>
 
-                <!-- ZAWARTOŚĆ -->
-                <ContentControl Content="{Binding SelectedEntry}" IsVisible="{Binding SelectedEntry, Converter={x:Static ObjectConverters.IsNotNull}}">
-                    <ContentControl.DataTemplates>
-                        
-                        <!-- WIDOK SZCZEGÓŁOWY ZADANIA -->
-                        <DataTemplate DataType="models:Task">
-                            <StackPanel Spacing="20">
-                                <TextBlock Text="ZADANIE" Foreground="Gray" FontSize="12" LetterSpacing="2"/>
-                                
-                                <Grid ColumnDefinitions="Auto, *">
-                                    <CheckBox IsChecked="{Binding IsDone}" RenderTransform="scale(1.5)" Margin="10,0,10,0" VerticalAlignment="Center"/>
-                                    <TextBox Grid.Column="1"
-                                             Text="{Binding Description}" 
-                                             FontSize="24" 
+                    <ContentControl Content="{Binding SelectedEntry}" IsVisible="{Binding SelectedEntry, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <ContentControl.DataTemplates>
+                            
+                            <DataTemplate DataType="models:Task">
+                                <StackPanel Spacing="20">
+                                    
+                                    <Grid ColumnDefinitions="Auto, *">
+                                        <CheckBox IsChecked="{Binding IsDone}" RenderTransform="scale(1.5)" Margin="10,0,10,0" VerticalAlignment="Center"
+                                                  Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).MarkAsDoneCommand}"
+                                                  CommandParameter="{Binding .}"/>
+                                        <TextBox Grid.Column="1"
+                                                 Text="{Binding Description}" 
+                                                 FontSize="24" 
+                                                 FontWeight="Bold" 
+                                                 BorderThickness="0" 
+                                                 Background="Transparent"
+                                                 TextWrapping="Wrap"/>
+                                    </Grid>
+                                    
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <Border Background="#E3F2FD" CornerRadius="5" Padding="5">
+                                            <TextBlock Text="{Binding Priority, StringFormat='Priorytet: {0}'}" Foreground="#1565C0"/>
+                                        </Border>
+                                        
+                                        <Border Background="#FFEBEE" CornerRadius="5" Padding="5">
+                                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                                <TextBlock Text="📅"/>
+                                                <TextBlock Text="{Binding DueDate, StringFormat='dd.MM.yyyy'}" Foreground="#C62828"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <ItemsControl ItemsSource="{Binding Tags}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="#F5F5F5" CornerRadius="4" Padding="5 5" Margin="0,0,5,0">
+                                                        <TextBlock Text="{Binding StringFormat='#{0}'}" Foreground="Gray"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="models:Note">
+                                <Grid RowDefinitions="Auto, *, Auto">
+                                    <TextBox Grid.Row="0" 
+                                             Text="{Binding Title}" 
+                                             FontSize="32" 
                                              FontWeight="Bold" 
                                              BorderThickness="0" 
-                                             Background="Transparent"
-                                             TextWrapping="Wrap"/>
-                                </Grid>
-                                
-                                <StackPanel Orientation="Horizontal" Spacing="10">
-                                    <Border Background="#E3F2FD" CornerRadius="5" Padding="5">
-                                        <TextBlock Text="{Binding Priority, StringFormat='Priorytet: {0}'}" Foreground="#1565C0"/>
-                                    </Border>
+                                             Background="Transparent" 
+                                             Watermark="Bez tytułu"
+                                             Margin="0,0,0,20"/>
                                     
-                                    <Border Background="#FFEBEE" CornerRadius="5" Padding="5">
-                                        <StackPanel Orientation="Horizontal" Spacing="5">
-                                            <TextBlock Text="📅"/>
-                                            <TextBlock Text="{Binding DueDate, StringFormat='dd.MM.yyyy'}" Foreground="#C62828"/>
-                                        </StackPanel>
-                                    </Border>
+                                    <TextBox Grid.Row="1" 
+                                             Text="{Binding Description}" 
+                                             AcceptsReturn="True" 
+                                             TextWrapping="Wrap" 
+                                             BorderThickness="0" 
+                                             Background="Transparent" 
+                                             FontSize="16"
+                                             VerticalAlignment="Stretch"
+                                             VerticalContentAlignment="Top"/>
 
-                                    <ItemsControl ItemsSource="{Binding Tags}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Background="#F5F5F5" CornerRadius="4" Padding="5,5" Margin="0,0,5,0">
-                                                    <TextBlock Text="{Binding StringFormat='#{0}'}" Foreground="Gray"/>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </StackPanel>
-                        </DataTemplate>
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10" Margin="0,20,0,0">
+                                        <ItemsControl ItemsSource="{Binding Tags}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="#FFF9C4" CornerRadius="4" Padding="8,2" Margin="0,0,5,0">
+                                                        <TextBlock Text="{Binding StringFormat='#{0}'}" Foreground="#FBC02D" FontWeight="SemiBold"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
 
-                        <!-- WIDOK SZCZEGÓŁOWY NOTATKI -->
-                        <DataTemplate DataType="models:Note">
-                            <Grid RowDefinitions="Auto, *, Auto"> <!-- 3 Wiersze -->
-                                
-                                <!-- 1. Tytuł -->
-                                <TextBox Grid.Row="0" 
-                                         Text="{Binding Title}" 
-                                         FontSize="32" 
-                                         FontWeight="Bold" 
-                                         BorderThickness="0" 
-                                         Background="Transparent" 
-                                         Watermark="Bez tytułu"
-                                         Margin="0,0,0,20"/>
-                                
-                                <!-- 2. Treść -->
-                                <TextBox Grid.Row="1" 
-                                         Text="{Binding Description}" 
-                                         AcceptsReturn="True" 
-                                         TextWrapping="Wrap" 
-                                         BorderThickness="0" 
-                                         Background="Transparent" 
-                                         FontSize="16"
-                                         VerticalAlignment="Stretch"
-                                         VerticalContentAlignment="Top"/>
+                        </ContentControl.DataTemplates>
+                    </ContentControl>
+                </Panel>
 
-                                <!-- 3. TAGI (NOWE) -->
-                                <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10" Margin="0,20,0,0">
-                                    <ItemsControl ItemsSource="{Binding Tags}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Background="#FFF9C4" CornerRadius="4" Padding="8,2" Margin="0,0,5,0">
-                                                    <TextBlock Text="{Binding StringFormat='#{0}'}" Foreground="#FBC02D" FontWeight="SemiBold"/>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                    </ItemsControl>
-                                </StackPanel>
+                <!-- obserwatorzy -->
+                <Border Grid.Row="1" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="20">
+                    <Grid ColumnDefinitions="*, *, *, *"> <!-- 4 Kolumny na statystyki -->
+                        
+                        <!-- zadania -->
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="ZADANIA" FontSize="10" Foreground="Gray" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding TaskStatsText}" FontSize="12" TextWrapping="Wrap"/>
+                        </StackPanel>
 
-                            </Grid>
-                        </DataTemplate>
+                        <!-- notatki -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="NOTATKI" FontSize="10" Foreground="Gray" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding NoteStatsText}" FontSize="12"/>
+                        </StackPanel>
 
-                    </ContentControl.DataTemplates>
-                </ContentControl>
-            </Panel>
+                        <!-- deadliny -->
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                            <TextBlock Text="DEADLINY" FontSize="10" Foreground="Gray" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding WeeklyStatsText}" FontSize="11"/>
+                        </StackPanel>
+
+                        <!-- priorytety -->
+                        <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                            <TextBlock Text="PRIORYTETY" FontSize="10" Foreground="Gray" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding PriorityStatsText}" FontSize="11" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
         </Border>
-        
     </Grid>
 </Window>
