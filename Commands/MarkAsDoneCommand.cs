@@ -7,7 +7,14 @@ namespace NotesApp.Commands;
 
 public class MarkAsDoneCommand : ICommand
 {
-    public event EventHandler? CanExecuteChanged;
+    // Fix CS0067: Wymuszamy puste akcesory, żeby kompilator wiedział, 
+    // że celowo nie używamy tego zdarzenia (bo w tej apce przyciski są zawsze aktywne).
+    public event EventHandler? CanExecuteChanged
+    {
+        add { }
+        remove { }
+    }
+
     public bool CanExecute(object? parameter) => parameter is IEntryComponent;
 
     public void Execute(object? parameter)
@@ -17,6 +24,7 @@ public class MarkAsDoneCommand : ICommand
             var status = entry.IsDone ? "ZROBIONE" : "DO ZROBIENIA";
             Console.WriteLine($"[Command] Zmiana statusu zadania na: {status}");
 
+            // Powiadomienie Obserwatorów
             AppManager.Instance.NotifyObservers();
         }
     }

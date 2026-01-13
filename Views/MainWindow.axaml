@@ -64,59 +64,64 @@
                          SelectedItem="{Binding SelectedEntry}"
                          Background="Transparent">
                     
-                    <!-- TUTAJ JEST NAPRAWA KLIKANIA -->
+                    <!-- TUTAJ JEST NAPRAWA BŁĘDU ISSELECTABLE -->
                     <ListBox.Styles>
-                        <!-- Styl dla kontenera wiersza (ListBoxItem) -->
                         <Style Selector="ListBoxItem">
-                            <!-- Bindujemy IsHitTestVisible do właściwości modelu IsSelectable -->
-                            <!-- Jeśli IsSelectable=false (Nagłówek), to cały wiersz ignoruje myszkę -->
-                            <Setter Property="IsHitTestVisible" Value="{Binding IsSelectable}"/>
-                            <!-- Wyłączamy też nawigację klawiaturą -->
-                            <Setter Property="Focusable" Value="{Binding IsSelectable}"/>
+                            <!-- KLUCZOWE: Dodano DataType=models:IEntryComponent -->
+                            <!-- Teraz XAML wie, że ma szukać IsSelectable w elemencie listy, a nie w oknie -->
+                            <Setter Property="IsHitTestVisible" Value="{Binding IsSelectable, DataType=models:IEntryComponent}"/>
+                            <Setter Property="Focusable" Value="{Binding IsSelectable, DataType=models:IEntryComponent}"/>
                         </Style>
                     </ListBox.Styles>
 
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Grid ColumnDefinitions="*, Auto">
-                                <!-- Wyświetlanie na liście: Zależy od typu -->
-                                <ContentControl Content="{Binding}">
-                                    <ContentControl.DataTemplates>
-                                        
-                                        <!-- Nagłówek Daty -->
-                                        <DataTemplate DataType="vm:DateHeader">
-                                            <Border Background="#F0F4C3" CornerRadius="4" Padding="5,2" Margin="0,10,0,2" HorizontalAlignment="Left">
-                                                <TextBlock Text="{Binding Title}" FontWeight="Bold" Foreground="#827717" FontSize="11"/>
-                                            </Border>
-                                        </DataTemplate>
+                            <!-- Usunęliśmy zewnętrzny Grid, który wymuszał przycisk X dla wszystkich -->
+                            <ContentControl Content="{Binding}">
+                                <ContentControl.DataTemplates>
+                                    
+                                    <!-- Nagłówek Daty (BEZ PRZYCISKU USUWANIA) -->
+                                    <DataTemplate DataType="vm:DateHeader">
+                                        <Border Background="#F0F4C3" CornerRadius="4" Padding="5,2" Margin="0,10,0,2" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding Title}" FontWeight="Bold" Foreground="#827717" FontSize="11"/>
+                                        </Border>
+                                    </DataTemplate>
 
-                                        <!-- Task na liście -->
-                                        <DataTemplate DataType="models:Task">
-                                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                                <CheckBox IsChecked="{Binding IsDone}"/> 
+                                    <!-- Task na liście (Z PRZYCISKIEM USUWANIA) -->
+                                    <DataTemplate DataType="models:Task">
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+                                                <CheckBox IsChecked="{Binding IsDone}" IsHitTestVisible="True"/> 
                                                 <TextBlock Text="{Binding Description}" 
                                                            VerticalAlignment="Center" 
                                                            FontWeight="SemiBold"
                                                            TextTrimming="CharacterEllipsis"/>
                                             </StackPanel>
-                                        </DataTemplate>
+                                            
+                                            <!-- Przycisk jest teraz tutaj, tylko dla Tasków -->
+                                            <Button Grid.Column="1" Content="x" Foreground="Red" Background="Transparent" Padding="5"
+                                                    Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).RemoveEntryCommand}"
+                                                    CommandParameter="{Binding .}"/>
+                                        </Grid>
+                                    </DataTemplate>
 
-                                        <!-- Notatka na liście (TYLKO TYTUŁ) -->
-                                        <DataTemplate DataType="models:Note">
-                                            <StackPanel Orientation="Vertical">
+                                    <!-- Notatka na liście (Z PRZYCISKIEM USUWANIA) -->
+                                    <DataTemplate DataType="models:Note">
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <StackPanel Grid.Column="0" Orientation="Vertical">
                                                 <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="14"/>
                                                 <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" MaxLines="1" TextTrimming="CharacterEllipsis"/>
                                             </StackPanel>
-                                        </DataTemplate>
-                                        
-                                    </ContentControl.DataTemplates>
-                                </ContentControl>
-                                
-                                <!-- Przycisk usuwania na liście -->
-                                <Button Grid.Column="1" Content="x" Foreground="Red" Background="Transparent" Padding="5"
-                                        Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).RemoveEntryCommand}"
-                                        CommandParameter="{Binding .}"/>
-                            </Grid>
+                                            
+                                            <!-- Przycisk jest teraz tutaj, tylko dla Notatek -->
+                                            <Button Grid.Column="1" Content="x" Foreground="Red" Background="Transparent" Padding="5"
+                                                    Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).RemoveEntryCommand}"
+                                                    CommandParameter="{Binding .}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                    
+                                </ContentControl.DataTemplates>
+                            </ContentControl>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
@@ -130,26 +135,26 @@
                     <!-- Pole Tytułu (Tylko dla notatek) -->
                     <TextBox Text="{Binding NewNoteTitle}" Watermark="Tytuł notatki..." IsVisible="{Binding IsNoteView}"/>
                     
-                    <TextBox Text="{Binding NewTaskDescription}" Watermark="{Binding IsNoteView, StringFormat='Treść notatki...', FallbackValue='Treść zadania...'}"/>
+                    <!-- TU BYŁ BŁĄD: Zamiast wiązać Watermark do IsNoteView, wiążemy do EntryDescriptionWatermark -->
+                    <TextBox Text="{Binding NewTaskDescription}" 
+                             Watermark="{Binding EntryDescriptionWatermark}"/>
                     
                     <TextBox Text="{Binding NewEntryTags}" Watermark="Tagi (np. praca, dom)"/>
 
-                    <!-- NOWE: Wybór Priorytetu i Daty (Widoczny tylko dla Zadań) -->
+                    <!-- Wybór Priorytetu i Daty (Widoczny tylko dla Zadań) -->
                     <StackPanel Orientation="Horizontal" Spacing="5" IsVisible="{Binding IsTaskView}">
-                        
-                        <!-- Priorytet -->
                         <ComboBox ItemsSource="{Binding AvailablePriorities}" 
                                   SelectedItem="{Binding NewTaskPriority}"
                                   Width="100"
                                   PlaceholderText="Priorytet"/>
 
-                        <!-- Data (DatePicker) -->
                         <DatePicker SelectedDate="{Binding NewTaskDueDate}"
                                     Width="120"
                                     DayFormat="dd"
                                     MonthFormat="MM"
                                     YearFormat="yy"/>
                     </StackPanel>
+                    
                     <Button Content="Dodaj (+)" Command="{Binding AddNewEntryCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Background="#2C3E50" Foreground="White"/>
                 </StackPanel>
             </Border>
@@ -163,7 +168,6 @@
                 <!-- PUSTY STAN (Widoczny gdy SelectedEntry == null) -->
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
                             IsVisible="{Binding SelectedEntry, Converter={x:Static ObjectConverters.IsNull}}">
-                    <TextBlock Text="👋" FontSize="50" HorizontalAlignment="Center"/>
                     <TextBlock Text="Wybierz notatkę lub zadanie z listy" FontSize="20" Foreground="Gray"/>
                 </StackPanel>
 
@@ -177,9 +181,7 @@
                                 <TextBlock Text="ZADANIE" Foreground="Gray" FontSize="12" LetterSpacing="2"/>
                                 
                                 <Grid ColumnDefinitions="Auto, *">
-                                    <!-- Checkbox powiększony RenderTransformem (bezpieczniej niż LayoutTransform) -->
                                     <CheckBox IsChecked="{Binding IsDone}" RenderTransform="scale(1.5)" Margin="10,0,10,0" VerticalAlignment="Center"/>
-                                    
                                     <TextBox Grid.Column="1"
                                              Text="{Binding Description}" 
                                              FontSize="24" 
@@ -194,13 +196,14 @@
                                         <TextBlock Text="{Binding Priority, StringFormat='Priorytet: {0}'}" Foreground="#1565C0"/>
                                     </Border>
                                     
+                                    <!-- Wyświetlanie Terminu -->
                                     <Border Background="#FFEBEE" CornerRadius="5" Padding="5">
                                         <StackPanel Orientation="Horizontal" Spacing="5">
                                             <TextBlock Text="📅"/>
                                             <TextBlock Text="{Binding DueDate, StringFormat='dd.MM.yyyy'}" Foreground="#C62828"/>
                                         </StackPanel>
                                     </Border>
-                                    
+
                                     <ItemsControl ItemsSource="{Binding Tags}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
@@ -220,7 +223,6 @@
                         <!-- WIDOK SZCZEGÓŁOWY NOTATKI (Obsidian Style) -->
                         <DataTemplate DataType="models:Note">
                             <Grid RowDefinitions="Auto, *">
-                                <!-- Edytowalny Tytuł -->
                                 <TextBox Grid.Row="0" 
                                          Text="{Binding Title}" 
                                          FontSize="32" 
@@ -230,7 +232,6 @@
                                          Watermark="Bez tytułu"
                                          Margin="0,0,0,20"/>
                                 
-                                <!-- Edytowalna Treść -->
                                 <TextBox Grid.Row="1" 
                                          Text="{Binding Description}" 
                                          AcceptsReturn="True" 

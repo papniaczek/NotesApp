@@ -14,20 +14,27 @@ namespace NotesApp.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    // ... (BEZ ZMIAN W GÓRNEJ CZĘŚCI KLASY) ...
+    // --- 1. ZARZĄDZANIE WIDOKIEM (TABS) ---
+    
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsTaskView))]
     [NotifyPropertyChangedFor(nameof(IsNoteView))]
+    [NotifyPropertyChangedFor(nameof(EntryDescriptionWatermark))] // <--- DODAJ TO (Powiadomienie o zmianie tekstu)
     private string _currentTab = "Note"; 
 
     public bool IsTaskView => CurrentTab == "Task";
     public bool IsNoteView => CurrentTab == "Note";
 
+    // NOWE: Dynamiczny tekst placeholdera
+    public string EntryDescriptionWatermark => IsNoteView ? "Treść notatki..." : "Treść zadania...";
+
+    // --- 2. DANE I SELEKCJA ---
     public ObservableCollection<IEntryComponent> FilteredEntries { get; } = new();
 
     [ObservableProperty]
     private IEntryComponent? _selectedEntry;
 
+    // --- 3. FORMULARZ ---
     [ObservableProperty] private string _newTaskDescription = string.Empty;
     [ObservableProperty] private string _newNoteTitle = string.Empty; 
     [ObservableProperty] private string _newTaskPriority = "Normal";
@@ -37,16 +44,20 @@ public partial class MainWindowViewModel : ViewModelBase
     public List<string> AvailablePriorities { get; } = new() { "High", "Normal", "Low" };
     public ObservableCollection<string> ExistingTags { get; } = new();
 
+    // --- 4. FILTROWANIE ---
     [ObservableProperty] private string _filterTagsText = string.Empty;
     [ObservableProperty] private string _selectedFilterPriority = "Wszystkie";
     [ObservableProperty] private string? _selectedTagFromList;
     public List<string> FilterPriorities { get; } = new() { "Wszystkie", "High", "Normal", "Low" };
 
+    // --- 5. KOMENDY ---
     public ICommand MarkAsDoneCommand { get; } = new MarkAsDoneCommand();
     public ICommand RemoveEntryCommand { get; } = new RemoveEntryCommand();
 
+    // --- 6. STATYSTYKI ---
     [ObservableProperty] private string _taskStatsText = "...";
     [ObservableProperty] private string _noteStatsText = "...";
+
 
     public MainWindowViewModel()
     {
@@ -54,6 +65,7 @@ public partial class MainWindowViewModel : ViewModelBase
         var noteObserver = new NoteStatsObserver((t) => NoteStatsText = t);
         AppManager.Instance.Attach(taskObserver);
         AppManager.Instance.Attach(noteObserver);
+        
         taskObserver.Update();
         noteObserver.Update();
 
@@ -176,7 +188,6 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnSelectedTagFromListChanged(string? value) { if(value!=null) { FilterTagsText = value; SelectedTagFromList = null; } }
 }
 
-// ZMODYFIKOWANA KLASA DATEHEADER
 public class DateHeader : IEntryComponent
 {
     public string Title { get; set; } = string.Empty;
@@ -184,7 +195,7 @@ public class DateHeader : IEntryComponent
     public bool IsDone { get; set; }
     public List<string> Tags { get; set; } = new();
     
-    // NOWE: Nagłówek jest NIEKLIKALNY
+    // Header jest nieklikalny
     public bool IsSelectable => false;
     
     public void Display() { }
