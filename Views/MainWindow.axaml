@@ -6,327 +6,246 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" 
         
-        Width="400" Height="750"
-        CanResize="False"
+        Width="1000" Height="700"
+        MinWidth="800" MinHeight="500"
         WindowStartupLocation="CenterScreen"
         
         x:Class="NotesApp.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         x:Name="Root"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Pocket Tasker"
+        Title="NotesApp Desktop"
         
-        RequestedThemeVariant="Light"> <Design.DataContext>
+        RequestedThemeVariant="Light">
+
+    <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
     
     <Window.Styles>
-        <Style Selector="Button.MenuBtn">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="VerticalAlignment" Value="Stretch"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-        </Style>
-        <Style Selector="Button.MenuBtn:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#F5F5F5"/> </Style>
-        
-        <Style Selector="Button.AddBtn">
-            <Setter Property="Background" Value="#6200EA"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CornerRadius" Value="25"/>
-            <Setter Property="Width" Value="50"/>
-            <Setter Property="Height" Value="50"/>
-            
-            <Setter Property="Padding" Value="0"/> <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-        </Style>
-        <Style Selector="Button.AddBtn:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#7C4DFF"/>
+        <!-- Styl dla listy po lewej -->
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Margin" Value="0,2"/>
         </Style>
     </Window.Styles>
 
-    <Grid RowDefinitions="Auto, Auto, Auto, *, Auto" Background="#FAFAFA"> 
+    <!-- GŁÓWNY GRID: 2 Kolumny -->
+    <Grid ColumnDefinitions="300, *" Background="#F0F2F5">
         
-        <Border Grid.Row="0" Padding="20, 25, 20, 20">
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
-                    <GradientStop Offset="0" Color="#6200EA"/>
-                    <GradientStop Offset="1" Color="#7C4DFF"/>
-                </LinearGradientBrush>
-            </Border.Background>
-            <StackPanel>
-                <TextBlock Text="Dzień dobry!" Foreground="#D1C4E9" FontSize="12"/>
-                <TextBlock Text="Twoje Centrum" Foreground="White" FontSize="24" FontWeight="Bold" Margin="0,5,0,0"/>
-            </StackPanel>
-        </Border>
-
-        <Border Grid.Row="1" Margin="15, 25, 15, 10" 
-                Background="White" 
-                CornerRadius="15" 
-                BoxShadow="0 4 10 0 #20000000">
+        <!-- === LEWY PANEL (Sidebar) === -->
+        <Grid Grid.Column="0" RowDefinitions="Auto, Auto, *, Auto" Background="White">
             
-            <Grid RowDefinitions="Auto, Auto" Margin="15">
-                
-                <DockPanel LastChildFill="True">
-    
-                    <Button DockPanel.Dock="Right"
-                            Classes="AddBtn"
-                            Command="{Binding AddNewEntryCommand}"
-                            Margin="10,0,0,0">
-                        <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" 
-                              Fill="White" 
-                              Width="20" Height="20" 
-                              Stretch="Uniform"/>
-                    </Button>
-
-                    <TextBox Watermark="Co masz na myśli?" 
-                             Text="{Binding NewTaskDescription}"
-                             BorderThickness="0"
-                             Background="Transparent"
-                             FontSize="16"
-                             Padding="0"
-                             MinHeight="0"
-                             
-                             VerticalAlignment="Center"
-                             VerticalContentAlignment="Center"
-                             
-                             TextWrapping="Wrap"
-                             AcceptsReturn="{Binding IsNoteView}"/>
-             
-                </DockPanel>
-
-                <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Margin="0,10,0,0">
-                    
-                    <Border Grid.Column="0" Background="#F5F5F5" CornerRadius="8" Padding="10,5" Margin="0,0,10,0">
-                        <Grid ColumnDefinitions="Auto, *">
-                            <TextBlock Text="#" 
-                                       Foreground="Gray" 
-                                       VerticalAlignment="Center" 
-                                       Margin="0,0,5,0"/>
-                            
-                            <TextBox Text="{Binding NewEntryTags}" 
-                                     Watermark="Tagi (np. praca dom)"
-                                     Background="Transparent"
-                                     BorderThickness="0"
-                                     FontSize="12"
-                                     Padding="10"
-                                     MinHeight="0"
-                                     VerticalAlignment="Center"
-                                     VerticalContentAlignment="Center"/>
-                        </Grid>
-                    </Border>
-
-                    <Border Grid.Column="1" 
-                            Background="#EDE7F6" 
-                            CornerRadius="8" 
-                            Padding="10,5"
-                            IsVisible="{Binding IsTaskView}">
-                        
-                        <StackPanel Orientation="Horizontal" Spacing="5">
-                            <TextBlock Text="🔥" VerticalAlignment="Center" FontSize="12"/>
-                            <ComboBox ItemsSource="{Binding AvailablePriorities}" 
-                                      SelectedItem="{Binding NewTaskPriority}"
-                                      SelectedIndex="1"
-                                      BorderThickness="0"
-                                      Background="Transparent"
-                                      Height="20"
-                                      FontSize="12"
-                                      Padding="0"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-            </Grid>
-        </Border>
-        
-        <Grid Grid.Row="2" ColumnDefinitions="*, Auto" Margin="15,0,15,10">
-            
-            <Border Grid.Column="0" Background="White" CornerRadius="10" Padding="10,5" Margin="0,0,10,0" BoxShadow="0 1 3 0 #10000000">
-                <Grid ColumnDefinitions="Auto, *, Auto">
-                    
-                    <TextBlock Grid.Column="0" Text="🔍" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                    
-                    <TextBox Grid.Column="1" 
-                             Text="{Binding FilterTagsText}"
-                             Watermark="Filtruj tagi..."
-                             BorderThickness="0"
-                             Background="Transparent"
-                             FontSize="12"
-                             Padding="25 5 0 5"
-                             MinHeight="0"
-                             VerticalAlignment="Center"/>
-
-                    <ComboBox Grid.Column="2"
-                              ItemsSource="{Binding ExistingTags}"
-                              SelectedItem="{Binding SelectedTagFromList}"
-                              PlaceholderText="..."
-                              BorderThickness="0"
-                              Background="Transparent"
-                              Padding="5,0"
-                              MinWidth="30"
-                              FontSize="12"
-                              VerticalAlignment="Center"
-                              HorizontalAlignment="Right"/>
-                </Grid>
+            <!-- 1. NAGŁÓWEK -->
+            <Border Grid.Row="0" Padding="20" Background="#2C3E50">
+                <TextBlock Text="NotesApp" Foreground="White" FontWeight="Bold" FontSize="18"/>
             </Border>
 
-            <Border Grid.Column="1" 
-                    Background="White" 
-                    CornerRadius="10" 
-                    Padding="5,0" 
-                    BoxShadow="0 1 3 0 #10000000"
-                    IsVisible="{Binding IsTaskView}">
-                
-                <ComboBox ItemsSource="{Binding FilterPriorities}"
-                          SelectedItem="{Binding SelectedFilterPriority}"
-                          BorderThickness="0"
-                          Background="Transparent"
-                          FontSize="12"
-                          Padding="10,5"
-                          CornerRadius="10"
-                          VerticalAlignment="Center"/>
-            </Border>
-        </Grid>
-
-        <ListBox Grid.Row="3" ItemsSource="{Binding FilteredEntries}" Background="Transparent" Margin="10,0">
-            <ListBox.Styles>
-                <Style Selector="ListBoxItem">
-                    <Setter Property="Padding" Value="0"/>
-                    <Setter Property="Margin" Value="0,0,0,10"/>
-                    <Setter Property="Background" Value="Transparent"/>
-                </Style>
-                <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                    <Setter Property="Background" Value="Transparent"/>
-                </Style>
-                <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-                    <Setter Property="Background" Value="Transparent"/>
-                </Style>
-            </ListBox.Styles>
-            
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <ContentControl Content="{Binding}">
-                        <ContentControl.DataTemplates>
-                            
-                            <DataTemplate DataType="models:Task">
-    <Border Background="White" CornerRadius="12" Padding="15" BoxShadow="0 2 5 0 #10000000">
-        <StackPanel> <Grid ColumnDefinitions="Auto, *, Auto">
-                <CheckBox Grid.Column="0" IsChecked="{Binding IsDone}"
-                          Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).MarkAsDoneCommand}"
-                          CommandParameter="{Binding .}"
-                          CornerRadius="20"/>
-                
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0">
-                    <TextBlock Text="{Binding Description}" 
-                               FontWeight="Medium" 
-                               FontSize="15"
-                               TextDecorations="{Binding IsDone, Converter={x:Static ObjectConverters.IsNull}}"/> 
-                    
-                    <Border Background="#F5F5F5" HorizontalAlignment="Left" CornerRadius="4" Padding="6,2" Margin="0,4,0,0">
-                        <TextBlock Text="{Binding Priority}" FontSize="10" Foreground="Gray"/>
-                    </Border>
-                </StackPanel>
-
-                <Button Grid.Column="2" Content="✕" FontSize="16" Background="Transparent" Foreground="#CFD8DC"
-                        Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).RemoveEntryCommand}"
-                        CommandParameter="{Binding .}"/>
+            <!-- 2. PRZEŁĄCZNIK (Zadania / Notatki) -->
+            <Grid Grid.Row="1" ColumnDefinitions="*, *" Margin="10">
+                <Button Grid.Column="0" Content="Zadania" 
+                        Command="{Binding SwitchTabCommand}" CommandParameter="Task"
+                        Background="{Binding IsTaskView, Converter={x:Static ObjectConverters.IsNull}}"
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                <Button Grid.Column="1" Content="Notatki" 
+                        Command="{Binding SwitchTabCommand}" CommandParameter="Note"
+                        Background="{Binding IsNoteView, Converter={x:Static ObjectConverters.IsNull}}"
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
             </Grid>
 
-            <ItemsControl ItemsSource="{Binding Tags}" Margin="44,5,0,0">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" Spacing="5"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Background="#E0F7FA" CornerRadius="4" Padding="6,2">
-                            <TextBlock Text="{Binding StringFormat='#{0}'}" FontSize="10" Foreground="#006064"/>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            
-        </StackPanel>
-    </Border>
-</DataTemplate>
-
-                            <DataTemplate DataType="models:Note">
-    <Border Background="#FFF59D" CornerRadius="0" Padding="20" BoxShadow="2 2 5 0 #20000000">
-        <Border.Styles>
-            <Style Selector="Border:pointerover">
-                <Setter Property="Background" Value="#FFF176"/>
-            </Style>
-        </Border.Styles>
-        
-        <Grid ColumnDefinitions="*, Auto">
-            <StackPanel Grid.Column="0">
-                <StackPanel Orientation="Horizontal" Spacing="5" Margin="0,0,0,10">
-                    <TextBlock Text="📌" FontSize="12"/>
-                    <TextBlock Text="NOTATKA" FontSize="10" FontWeight="Bold" Foreground="#F57F17" VerticalAlignment="Center"/>
-                </StackPanel>
+            <!-- 3. LISTA ELEMENTÓW (Tytuły) -->
+            <DockPanel Grid.Row="2" Margin="10,0">
+                <!-- Szukajka -->
+                <TextBox DockPanel.Dock="Top" Text="{Binding FilterTagsText}" Watermark="Szukaj..." Margin="0,0,0,10"/>
                 
-                <TextBlock Text="{Binding Description}" 
-                           TextWrapping="Wrap" 
-                           FontSize="14"
-                           FontFamily="Consolas" 
-                           Foreground="#3E2723"/>
+                <!-- Lista -->
+                <ListBox ItemsSource="{Binding FilteredEntries}" 
+                         SelectedItem="{Binding SelectedEntry}"
+                         Background="Transparent">
+                    
+                    <!-- TUTAJ JEST NAPRAWA KLIKANIA -->
+                    <ListBox.Styles>
+                        <!-- Styl dla kontenera wiersza (ListBoxItem) -->
+                        <Style Selector="ListBoxItem">
+                            <!-- Bindujemy IsHitTestVisible do właściwości modelu IsSelectable -->
+                            <!-- Jeśli IsSelectable=false (Nagłówek), to cały wiersz ignoruje myszkę -->
+                            <Setter Property="IsHitTestVisible" Value="{Binding IsSelectable}"/>
+                            <!-- Wyłączamy też nawigację klawiaturą -->
+                            <Setter Property="Focusable" Value="{Binding IsSelectable}"/>
+                        </Style>
+                    </ListBox.Styles>
 
-                <ItemsControl ItemsSource="{Binding Tags}" Margin="0,10,0,0">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal"/> </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
+                    <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Border Background="#FFF9C4" BorderBrush="#FBC02D" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,5,5">
-                                <TextBlock Text="{Binding StringFormat='#{0}'}" FontSize="10" Foreground="#E65100"/>
-                            </Border>
+                            <Grid ColumnDefinitions="*, Auto">
+                                <!-- Wyświetlanie na liście: Zależy od typu -->
+                                <ContentControl Content="{Binding}">
+                                    <ContentControl.DataTemplates>
+                                        
+                                        <!-- Nagłówek Daty -->
+                                        <DataTemplate DataType="vm:DateHeader">
+                                            <Border Background="#F0F4C3" CornerRadius="4" Padding="5,2" Margin="0,10,0,2" HorizontalAlignment="Left">
+                                                <TextBlock Text="{Binding Title}" FontWeight="Bold" Foreground="#827717" FontSize="11"/>
+                                            </Border>
+                                        </DataTemplate>
+
+                                        <!-- Task na liście -->
+                                        <DataTemplate DataType="models:Task">
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <CheckBox IsChecked="{Binding IsDone}"/> 
+                                                <TextBlock Text="{Binding Description}" 
+                                                           VerticalAlignment="Center" 
+                                                           FontWeight="SemiBold"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+
+                                        <!-- Notatka na liście (TYLKO TYTUŁ) -->
+                                        <DataTemplate DataType="models:Note">
+                                            <StackPanel Orientation="Vertical">
+                                                <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="14"/>
+                                                <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" MaxLines="1" TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                        
+                                    </ContentControl.DataTemplates>
+                                </ContentControl>
+                                
+                                <!-- Przycisk usuwania na liście -->
+                                <Button Grid.Column="1" Content="x" Foreground="Red" Background="Transparent" Padding="5"
+                                        Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).RemoveEntryCommand}"
+                                        CommandParameter="{Binding .}"/>
+                            </Grid>
                         </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
 
-            </StackPanel>
-            
-            <Button Grid.Column="1" Content="✕" Background="Transparent" Foreground="#A1887F"
-                    VerticalAlignment="Top" Margin="5,-10,-10,0"
-                    Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).RemoveEntryCommand}"
-                    CommandParameter="{Binding .}"/>
+            <!-- 4. DODAWANIE (Uproszczone na dole) -->
+            <Border Grid.Row="3" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="15">
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Nowy element:" FontWeight="Bold"/>
+                    
+                    <!-- Pole Tytułu (Tylko dla notatek) -->
+                    <TextBox Text="{Binding NewNoteTitle}" Watermark="Tytuł notatki..." IsVisible="{Binding IsNoteView}"/>
+                    
+                    <TextBox Text="{Binding NewTaskDescription}" Watermark="{Binding IsNoteView, StringFormat='Treść notatki...', FallbackValue='Treść zadania...'}"/>
+                    
+                    <TextBox Text="{Binding NewEntryTags}" Watermark="Tagi (np. praca, dom)"/>
+
+                    <!-- NOWE: Wybór Priorytetu i Daty (Widoczny tylko dla Zadań) -->
+                    <StackPanel Orientation="Horizontal" Spacing="5" IsVisible="{Binding IsTaskView}">
+                        
+                        <!-- Priorytet -->
+                        <ComboBox ItemsSource="{Binding AvailablePriorities}" 
+                                  SelectedItem="{Binding NewTaskPriority}"
+                                  Width="100"
+                                  PlaceholderText="Priorytet"/>
+
+                        <!-- Data (DatePicker) -->
+                        <DatePicker SelectedDate="{Binding NewTaskDueDate}"
+                                    Width="120"
+                                    DayFormat="dd"
+                                    MonthFormat="MM"
+                                    YearFormat="yy"/>
+                    </StackPanel>
+                    <Button Content="Dodaj (+)" Command="{Binding AddNewEntryCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Background="#2C3E50" Foreground="White"/>
+                </StackPanel>
+            </Border>
         </Grid>
-    </Border>
-</DataTemplate>
 
-                        </ContentControl.DataTemplates>
-                    </ContentControl>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
 
-        <Border Grid.Row="4" Background="White" BoxShadow="0 -5 15 0 #10000000">
-            <Grid ColumnDefinitions="*, *">
-                
-                <Button Grid.Column="0" Classes="MenuBtn"
-                        Command="{Binding SwitchTabCommand}" CommandParameter="Task">
-                    <StackPanel Spacing="2">
-                        <TextBlock Text="Task" HorizontalAlignment="Center" 
-                                   FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="20"
-                                   Foreground="{Binding IsTaskView, Converter={x:Static ObjectConverters.IsNull}}"/> 
-                                   <TextBlock Text="Zadania" HorizontalAlignment="Center" FontSize="11" FontWeight="SemiBold"/>
-                        <TextBlock Text="{Binding TaskStatsText}" FontSize="9" Foreground="Gray" HorizontalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
-                
-                <Button Grid.Column="1" Classes="MenuBtn"
-                        Command="{Binding SwitchTabCommand}" CommandParameter="Note">
-                    <StackPanel Spacing="2">
-                        <TextBlock Text="Note" HorizontalAlignment="Center" 
-                                   FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="20"/>
-                        <TextBlock Text="Notatki" HorizontalAlignment="Center" FontSize="11" FontWeight="SemiBold"/>
-                        <TextBlock Text="{Binding NoteStatsText}" FontSize="9" Foreground="Gray" HorizontalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
-            </Grid>
+        <!-- === PRAWY PANEL (Content / Edytor) === -->
+        <Border Grid.Column="1" Padding="40" Background="#F9F9F9">
+            <!-- Wyświetla szczegóły ZAZNACZONEGO elementu -->
+            <Panel>
+                <!-- PUSTY STAN (Widoczny gdy SelectedEntry == null) -->
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                            IsVisible="{Binding SelectedEntry, Converter={x:Static ObjectConverters.IsNull}}">
+                    <TextBlock Text="👋" FontSize="50" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Wybierz notatkę lub zadanie z listy" FontSize="20" Foreground="Gray"/>
+                </StackPanel>
+
+                <!-- ZAWARTOŚĆ (Widoczna gdy SelectedEntry != null) -->
+                <ContentControl Content="{Binding SelectedEntry}" IsVisible="{Binding SelectedEntry, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <ContentControl.DataTemplates>
+                        
+                        <!-- WIDOK SZCZEGÓŁOWY ZADANIA -->
+                        <DataTemplate DataType="models:Task">
+                            <StackPanel Spacing="20">
+                                <TextBlock Text="ZADANIE" Foreground="Gray" FontSize="12" LetterSpacing="2"/>
+                                
+                                <Grid ColumnDefinitions="Auto, *">
+                                    <!-- Checkbox powiększony RenderTransformem (bezpieczniej niż LayoutTransform) -->
+                                    <CheckBox IsChecked="{Binding IsDone}" RenderTransform="scale(1.5)" Margin="10,0,10,0" VerticalAlignment="Center"/>
+                                    
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding Description}" 
+                                             FontSize="24" 
+                                             FontWeight="Bold" 
+                                             BorderThickness="0" 
+                                             Background="Transparent"
+                                             TextWrapping="Wrap"/>
+                                </Grid>
+                                
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <Border Background="#E3F2FD" CornerRadius="5" Padding="5">
+                                        <TextBlock Text="{Binding Priority, StringFormat='Priorytet: {0}'}" Foreground="#1565C0"/>
+                                    </Border>
+                                    
+                                    <Border Background="#FFEBEE" CornerRadius="5" Padding="5">
+                                        <StackPanel Orientation="Horizontal" Spacing="5">
+                                            <TextBlock Text="📅"/>
+                                            <TextBlock Text="{Binding DueDate, StringFormat='dd.MM.yyyy'}" Foreground="#C62828"/>
+                                        </StackPanel>
+                                    </Border>
+                                    
+                                    <ItemsControl ItemsSource="{Binding Tags}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#F5F5F5" CornerRadius="4" Padding="5,5" Margin="0,0,5,0">
+                                                    <TextBlock Text="{Binding StringFormat='#{0}'}" Foreground="Gray"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+
+                        <!-- WIDOK SZCZEGÓŁOWY NOTATKI (Obsidian Style) -->
+                        <DataTemplate DataType="models:Note">
+                            <Grid RowDefinitions="Auto, *">
+                                <!-- Edytowalny Tytuł -->
+                                <TextBox Grid.Row="0" 
+                                         Text="{Binding Title}" 
+                                         FontSize="32" 
+                                         FontWeight="Bold" 
+                                         BorderThickness="0" 
+                                         Background="Transparent" 
+                                         Watermark="Bez tytułu"
+                                         Margin="0,0,0,20"/>
+                                
+                                <!-- Edytowalna Treść -->
+                                <TextBox Grid.Row="1" 
+                                         Text="{Binding Description}" 
+                                         AcceptsReturn="True" 
+                                         TextWrapping="Wrap" 
+                                         BorderThickness="0" 
+                                         Background="Transparent" 
+                                         FontSize="16"
+                                         VerticalAlignment="Stretch"
+                                         VerticalContentAlignment="Top"/>
+                            </Grid>
+                        </DataTemplate>
+
+                    </ContentControl.DataTemplates>
+                </ContentControl>
+            </Panel>
         </Border>
         
     </Grid>
