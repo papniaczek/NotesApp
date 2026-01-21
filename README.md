@@ -93,8 +93,12 @@ dotnet restore
 dotnet run
 ```
 
+---
+
 Autorzy:
 - Kacper Strześniewski
 - Kacper Holcman
 - Szymon Niemyjski
 - Karolina Czaplicka
+
+---
