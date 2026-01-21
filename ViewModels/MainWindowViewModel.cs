@@ -64,8 +64,6 @@ public partial class MainWindowViewModel : ViewModelBase
         AppManager.Instance.Attach(weeklyObserver);
         AppManager.Instance.Attach(priorityObserver);
         
-        // POD ŻADNYM POZOREM NIE ODPALAĆ!!!:::: https://www.youtube.com/watch?v=KSPxHniCtmw
-        
         taskObserver.Update();
         noteObserver.Update();
         weeklyObserver.Update();
