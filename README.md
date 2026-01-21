@@ -59,3 +59,42 @@ W aplikacji zaimplementowano 5 kluczowych wzorców:
     - Upraszcza tworzenie skomplikowanych obiektów zadań, które posiadają wiele parametrów opcjonalnych (priorytet, data, kategoria).
 
 ---
+
+## Instrukcja Instalacji i Uruchomienia
+
+Aby uruchomić projekt na swoim komputerze, wykonaj poniższe kroki.
+
+### Wymagania wstępne
+
+- System operacyjny: Windows, macOS lub Linux.
+- .NET 8.0 SDK - [Pobierz tutaj.](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+
+### Krok 1: Pobranie kodu
+
+Otwórz terminal (lub konsolę Git Bash) i wpisz:
+```
+git clone https://github.com/papniaczek/NotesApp.git
+cd NotesApp
+```
+
+### Krok 2: Uruchomienie z IDE (Zalecane)
+
+Najwygodniejszym sposobem jest użycie edytora kodu:
+
+1. Otwórz folder projektu w JetBrains Rider, Visual Studio 2022 lub Visual Studio Code.
+2. Zaczekaj chwilę, aż edytor pobierze wymagane biblioteki (NuGet restore).
+3. Naciśnij przycisk Run (lub klawisz F5).
+
+### Krok 3: Uruchomienie z terminala
+
+Możesz też uruchomić aplikację bezpośrednio z linii komend:
+```
+dotnet restore
+dotnet run
+```
+
+Autorzy:
+- Kacper Strześniewski
+- Kacper Holcman
+- Szymon Niemyjski
+- Karolina Czaplicka
